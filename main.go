@@ -66,10 +66,16 @@ func WalkFilterMarkdown(dir string) ([]MarkdownFile, error) {
 }
 
 func main() {
-	files, err := WalkFilterMarkdown(".")
+	localFiles, err := WalkFilterMarkdown(".")
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Printf("Found %d markdown files\n", len(files))
-	fmt.Println(files)
+	fmt.Printf("%d local markdown files\n", len(localFiles))
+	fmt.Println(localFiles)
+	remoteFiles, err := GetArticleState("alice", "")
+	if err != nil {
+		panic(err.Error())
+	}
+	fmt.Printf("%d remote markdown files\n", len(remoteFiles))
+	fmt.Println(remoteFiles)
 }
