@@ -9,7 +9,7 @@ import (
 	"regexp"
 )
 
-const baseURL = "localhost:8080"
+const baseURL = "api.localhost:8080"
 
 var ignore = [...]string{".git"}
 
