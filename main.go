@@ -6,6 +6,11 @@ import (
 	"os"
 )
 
+const (
+	author = "alice"
+	token  = "token_a"
+)
+
 func printDiff(diff []MarkdownDiff) {
 	fmt.Printf("\033[1m%d action(s) staged\033[0m\n", len(diff))
 	for _, i := range diff {
@@ -25,7 +30,7 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	remoteFiles, err := RemoteArticleState("alice", "")
+	remoteFiles, err := RemoteArticleState(author, token)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -33,4 +38,5 @@ func main() {
 	printDiff(diff)
 	fmt.Print("Press 'Enter' to continue...")
 	bufio.NewReader(os.Stdin).ReadBytes('\n')
+	sync(author, token, diff)
 }
