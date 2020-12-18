@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"regexp"
 
+	"github.com/moyen-blog/sync-dir/asset"
 	"github.com/moyen-blog/sync-dir/client"
 )
 
@@ -12,10 +13,9 @@ const baseURL = "api.localhost:8080"
 
 var ignore = [...]string{".git"}
 
-// LocalArticleState returns all markdown files in the current directory
-// SHA1 hash is computed from file contents
-func LocalArticleState(dir string) ([]MarkdownFile, error) {
-	files := make([]MarkdownFile, 0)
+// LocalAssetState returns all asset files in the current directory
+func LocalAssetState(dir string) ([]asset.Asset, error) {
+	assets := make([]asset.Asset, 0)
 	r := regexp.MustCompile(`.\.md$`)
 	walk := func(n string, f os.FileInfo, err error) error {
 		if f.IsDir() {
@@ -27,20 +27,23 @@ func LocalArticleState(dir string) ([]MarkdownFile, error) {
 			return nil
 		}
 		if r.MatchString(n) {
-			m, err := NewMarkdownFile(n)
+			m, err := asset.NewMarkdown(n)
 			if err != nil {
 				return err
 			}
-			files = append(files, *m)
+			assets = append(assets, m.Asset)
+			for _, i := range m.Images {
+				assets = append(assets, i.Asset)
+			}
 		}
 		return nil
 	}
 	err := filepath.Walk(dir, walk)
-	return files, err
+	return assets, err
 }
 
-// RemoteArticleState returns the state of an authors articles
-func RemoteArticleState(author string, token string) (result []MarkdownFile, err error) {
-	err = client.GetArticles(author, token, &result)
+// RemoteAssetState returns the state of an authors articles
+func RemoteAssetState(author string, token string) (result []asset.Asset, err error) {
+	err = client.GetAssets(author, token, &result)
 	return
 }

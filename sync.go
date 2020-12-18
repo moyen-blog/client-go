@@ -19,20 +19,15 @@ func follow(progress chan error, done chan bool) {
 	done <- true
 }
 
-func sync(author string, token string, diff []MarkdownDiff) {
+func sync(author string, token string, diff []AssetDiff) {
 	progress, done := make(chan error, len(diff)), make(chan bool, 1)
 	go follow(progress, done)
 	for _, i := range diff {
 		switch i.Action {
 		case Create, Update:
-			content, err := i.File.getContent()
-			if err != nil {
-				progress <- err
-				continue
-			}
-			progress <- client.PutArticle(author, token, i.File.Path, content)
+			progress <- client.PutAsset(author, token, i.Asset.Path, i.Asset)
 		case Delete:
-			progress <- client.DeleteArticle(author, token, i.File.Path)
+			progress <- client.DeleteAsset(author, token, i.Asset.Path)
 		}
 	}
 	close(progress)
