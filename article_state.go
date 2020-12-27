@@ -13,6 +13,17 @@ const baseURL = "api.localhost:8080"
 
 var ignore = [...]string{".git"}
 
+func uniqueAssets(assets []asset.Asset) (unique []asset.Asset) {
+	keys := make(map[string]bool) // Used to check for previously seen asset paths
+	for _, a := range assets {
+		if _, hit := keys[a.Path]; !hit {
+			keys[a.Path] = true
+			unique = append(unique, a)
+		}
+	}
+	return
+}
+
 // LocalAssetState returns all asset files in the current directory
 func LocalAssetState(dir string) ([]asset.Asset, error) {
 	assets := make([]asset.Asset, 0)
@@ -39,7 +50,7 @@ func LocalAssetState(dir string) ([]asset.Asset, error) {
 		return nil
 	}
 	err := filepath.Walk(dir, walk)
-	return assets, err
+	return uniqueAssets(assets), err
 }
 
 // RemoteAssetState returns the state of an authors articles

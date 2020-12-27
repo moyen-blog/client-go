@@ -1,10 +1,9 @@
 package client
 
 import (
-	"encoding/json"
+	"bytes"
+	"errors"
 	"fmt"
-	"io"
-	"net/http"
 )
 
 const baseURL = "api.localhost:8080"
@@ -26,7 +25,10 @@ func GetAssets(author string, token string, holder interface{}) error {
 
 // PutAsset upserts an asset for a provided author
 // Used for both creating and updating articles and images
-func PutAsset(author string, token string, path string, payload io.Reader) error {
+func PutAsset(author string, token string, path string, payload *bytes.Buffer) error {
+	if payload == nil {
+		return errors.New("Payload can not be nil")
+	}
 	_, err := request("PUT", authorFileURL(author, path), token, payload, nil)
 	return err
 }
@@ -35,22 +37,4 @@ func PutAsset(author string, token string, path string, payload io.Reader) error
 func DeleteAsset(author string, token string, path string) error {
 	_, err := request("DELETE", authorFileURL(author, path), token, nil, nil)
 	return err
-}
-
-func request(method string, url string, token string, payload io.Reader, holder interface{}) (int, error) {
-	req, err := http.NewRequest(method, url, payload)
-	if err != nil {
-		return 0, err
-	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return 0, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		err = fmt.Errorf("Request failed with status code %d", resp.StatusCode)
-	}
-	json.NewDecoder(resp.Body).Decode(&holder)
-	return resp.StatusCode, nil
 }

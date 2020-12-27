@@ -1,9 +1,11 @@
 package asset
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"encoding/hex"
 	"io"
+	"io/ioutil"
 	"os"
 )
 
@@ -11,16 +13,6 @@ import (
 type Asset struct {
 	Path string
 	Hash string
-}
-
-// Read allows Asset to conform to the io.Reader interface
-func (f Asset) Read(p []byte) (int, error) {
-	file, err := os.Open(f.Path)
-	if err != nil {
-		return 0, err
-	}
-	defer file.Close()
-	return file.Read(p)
 }
 
 func (f *Asset) computeHash() (string, error) {
@@ -32,4 +24,23 @@ func (f *Asset) computeHash() (string, error) {
 	h := sha1.New()
 	_, err = io.Copy(h, file)
 	return hex.EncodeToString(h.Sum(nil)), err
+}
+
+// Buffer returns a bytes.Buffer of the asset files content
+func (f *Asset) Buffer() (*bytes.Buffer, error) {
+	b, err := ioutil.ReadFile(f.Path)
+	if err != nil {
+		return nil, err
+	}
+	return bytes.NewBuffer(b), nil
+}
+
+// NewAsset declares an asset describing markdown and images files
+// The hash of the file contents is computed
+func NewAsset(path string) (f *Asset, err error) {
+	a := &Asset{
+		Path: path,
+	}
+	a.Hash, err = a.computeHash()
+	return a, err
 }

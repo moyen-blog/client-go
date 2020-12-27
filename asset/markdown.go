@@ -46,15 +46,12 @@ func (f *Markdown) scanImages() ([]*Image, error) {
 // NewMarkdown declares a markdown file from a file path
 // The hash of the file contents is computed
 func NewMarkdown(path string) (f *Markdown, err error) {
-	a := Asset{
-		Path: path,
-	}
-	a.Hash, err = a.computeHash()
+	a, err := NewAsset(path)
 	if err != nil {
 		return nil, err
 	}
 	f = &Markdown{
-		Asset: a,
+		Asset: *a,
 	}
 	f.Images, err = f.scanImages()
 	return f, err

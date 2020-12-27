@@ -25,7 +25,8 @@ func sync(author string, token string, diff []AssetDiff) {
 	for _, i := range diff {
 		switch i.Action {
 		case Create, Update:
-			progress <- client.PutAsset(author, token, i.Asset.Path, i.Asset)
+			b, _ := i.Asset.Buffer() // Will be caught by client.PutAsset
+			progress <- client.PutAsset(author, token, i.Asset.Path, b)
 		case Delete:
 			progress <- client.DeleteAsset(author, token, i.Asset.Path)
 		}
