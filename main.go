@@ -26,6 +26,9 @@ func printDiff(diff []AssetDiff) {
 }
 
 func main() {
+	if err := LoadIgnore("."); err != nil {
+		panic(err.Error())
+	}
 	localFiles, err := LocalAssetState(".")
 	if err != nil {
 		panic(err.Error())
