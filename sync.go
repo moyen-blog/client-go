@@ -19,16 +19,16 @@ func follow(progress chan error, done chan bool) {
 	done <- true
 }
 
-func sync(author string, token string, diff []AssetDiff) {
+func sync(c *client.Client, diff []AssetDiff) {
 	progress, done := make(chan error, len(diff)), make(chan bool, 1)
 	go follow(progress, done)
 	for _, i := range diff {
 		switch i.Action {
 		case Create, Update:
 			b, _ := i.Asset.Buffer() // Will be caught by client.PutAsset
-			progress <- client.PutAsset(author, token, i.Asset.Path, b)
+			progress <- c.PutAsset(i.Asset.Path, b)
 		case Delete:
-			progress <- client.DeleteAsset(author, token, i.Asset.Path)
+			progress <- c.DeleteAsset(i.Asset.Path)
 		}
 	}
 	close(progress)

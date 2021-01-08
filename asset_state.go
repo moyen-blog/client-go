@@ -25,18 +25,17 @@ func uniqueAssets(assets []asset.Asset) (unique []asset.Asset) {
 }
 
 // LoadIgnore loads a list of glob patterns to ignore local files and directories
-func LoadIgnore(dir string) error {
+func LoadIgnore(dir string) {
 	path := filepath.Join(dir, ".moyenignore")
 	file, err := os.Open(path)
 	if err != nil {
-		return nil // Carry on with the default ignore slice
+		return // Carry on with the default ignore slice
 	}
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		ignore = append(ignore, scanner.Text()) // Add to slice of ignored globs
 	}
-	return scanner.Err()
 }
 
 // LocalAssetState returns all asset files in the current directory
@@ -69,7 +68,7 @@ func LocalAssetState(dir string) ([]asset.Asset, error) {
 }
 
 // RemoteAssetState returns the state of an authors articles
-func RemoteAssetState(author string, token string) (result []asset.Asset, err error) {
-	err = client.GetAssets(author, token, &result)
+func RemoteAssetState(c *client.Client) (result []asset.Asset, err error) {
+	err = c.GetAssets(&result)
 	return
 }

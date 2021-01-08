@@ -4,11 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-)
 
-const (
-	author = "alice"
-	token  = "token_a"
+	"github.com/moyen-blog/sync-dir/client"
 )
 
 func printDiff(diff []AssetDiff) {
@@ -25,21 +22,28 @@ func printDiff(diff []AssetDiff) {
 	}
 }
 
+func fatalError(message string, err error) {
+	fmt.Println("\033[31mERROR\033[0m", message+":", err.Error())
+	os.Exit(1)
+}
+
 func main() {
-	if err := LoadIgnore("."); err != nil {
-		panic(err.Error())
+	LoadIgnore(".")
+	c, err := client.NewClient()
+	if err != nil {
+		fatalError("Failed to create new API client", err)
 	}
 	localFiles, err := LocalAssetState(".")
 	if err != nil {
-		panic(err.Error())
+		fatalError("Failed to determine local asset state", err)
 	}
-	remoteFiles, err := RemoteAssetState(author, token)
+	remoteFiles, err := RemoteAssetState(c)
 	if err != nil {
-		panic(err.Error())
+		fatalError("Failed to determine remote asset state", err)
 	}
 	diff := diffAssets(localFiles, remoteFiles)
 	printDiff(diff)
 	fmt.Print("Press 'Enter' to continue...")
 	bufio.NewReader(os.Stdin).ReadBytes('\n')
-	sync(author, token, diff)
+	sync(c, diff)
 }
