@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -10,8 +9,6 @@ import (
 	"github.com/moyen-blog/sync-dir/client"
 	"github.com/ryanuber/go-glob"
 )
-
-var ignore = []string{".git"}
 
 func uniqueAssets(assets []asset.Asset) (unique []asset.Asset) {
 	keys := make(map[string]bool) // Used to check for previously seen asset paths
@@ -24,22 +21,8 @@ func uniqueAssets(assets []asset.Asset) (unique []asset.Asset) {
 	return
 }
 
-// LoadIgnore loads a list of glob patterns to ignore local files and directories
-func LoadIgnore(dir string) {
-	path := filepath.Join(dir, ".moyenignore")
-	file, err := os.Open(path)
-	if err != nil {
-		return // Carry on with the default ignore slice
-	}
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		ignore = append(ignore, scanner.Text()) // Add to slice of ignored globs
-	}
-}
-
 // LocalAssetState returns all asset files in the current directory
-func LocalAssetState(dir string) ([]asset.Asset, error) {
+func LocalAssetState(dir string, ignore []string) ([]asset.Asset, error) {
 	assets := make([]asset.Asset, 0)
 	r := regexp.MustCompile(`.\.md$`)
 	walk := func(n string, f os.FileInfo, err error) error {

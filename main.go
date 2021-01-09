@@ -28,12 +28,19 @@ func fatalError(message string, err error) {
 }
 
 func main() {
-	LoadIgnore(".")
-	c, err := client.NewClient()
+	cwd, err := os.Getwd()
+	if err != nil {
+		fatalError("Failed to read current working directory", err)
+	}
+	config, err := ParseConfigJSON(cwd)
+	if err != nil {
+		fatalError("Failed to load configuration JSON", err)
+	}
+	c, err := client.NewClient(config.Username, config.Token, config.Endpoint)
 	if err != nil {
 		fatalError("Failed to create new API client", err)
 	}
-	localFiles, err := LocalAssetState(".")
+	localFiles, err := LocalAssetState(cwd, config.ignore)
 	if err != nil {
 		fatalError("Failed to determine local asset state", err)
 	}

@@ -5,7 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"regexp"
 )
+
+const defaultEndpoint = "https://api.moyen.blog"
 
 // Client defines an instance of an API client
 type Client struct {
@@ -16,20 +19,23 @@ type Client struct {
 
 // NewClient creates an API client
 // Configuration is loaded from .moyenrc (JSON) in CWD
-func NewClient() (*Client, error) {
-	config, err := parseConfigJSON()
-	if err != nil {
-		return nil, err
+func NewClient(username, token, endpoint string) (*Client, error) {
+	if endpoint == "" {
+		endpoint = defaultEndpoint
 	}
-	e, err := url.Parse(config.Endpoint)
+	r := regexp.MustCompile(`^\w+$`) // Just ensure username and token are present
+	if !r.MatchString(username) || !r.MatchString(token) {
+		return nil, errors.New("Invalid username and/or token")
+	}
+	e, err := url.Parse(endpoint) // Ensure valid API endpoint
 	if err != nil {
 		return nil, fmt.Errorf("Failed to parse API endpoint %s", e)
 	}
 	e.Path, e.RawQuery, e.RawQuery, e.User = "", "", "", nil // Ignore all but scheme, host
-	e.Host = config.Username + "." + e.Host
+	e.Host = username + "." + e.Host
 	return &Client{
-		config.Username,
-		config.Token,
+		username,
+		token,
 		e.String(),
 	}, nil
 }
