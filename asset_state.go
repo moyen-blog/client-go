@@ -7,7 +7,6 @@ import (
 
 	"github.com/moyen-blog/sync-dir/asset"
 	"github.com/moyen-blog/sync-dir/client"
-	"github.com/ryanuber/go-glob"
 )
 
 func uniqueAssets(assets []asset.Asset) (unique []asset.Asset) {
@@ -26,8 +25,12 @@ func LocalAssetState(dir string, ignore []string) ([]asset.Asset, error) {
 	assets := make([]asset.Asset, 0)
 	r := regexp.MustCompile(`.\.md$`)
 	walk := func(path string, f os.FileInfo, err error) error {
+		relative, err := filepath.Rel(dir, path)
+		if err != nil {
+			return err
+		}
 		for _, i := range ignore { // Skip ignored files and directories
-			if glob.Glob(i, f.Name()) { // Glob file or directory name
+			if match, _ := filepath.Match(i, relative); match { // Glob file or directory name
 				if f.IsDir() {
 					return filepath.SkipDir
 				}
@@ -35,10 +38,6 @@ func LocalAssetState(dir string, ignore []string) ([]asset.Asset, error) {
 			}
 		}
 		if r.MatchString(path) {
-			relative, err := filepath.Rel(dir, path)
-			if err != nil {
-				return err
-			}
 			markdown, err := asset.NewMarkdown(relative)
 			if err != nil {
 				return err
