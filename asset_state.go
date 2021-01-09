@@ -25,7 +25,7 @@ func uniqueAssets(assets []asset.Asset) (unique []asset.Asset) {
 func LocalAssetState(dir string, ignore []string) ([]asset.Asset, error) {
 	assets := make([]asset.Asset, 0)
 	r := regexp.MustCompile(`.\.md$`)
-	walk := func(n string, f os.FileInfo, err error) error {
+	walk := func(path string, f os.FileInfo, err error) error {
 		for _, i := range ignore { // Skip ignored files and directories
 			if glob.Glob(i, f.Name()) { // Glob file or directory name
 				if f.IsDir() {
@@ -34,14 +34,18 @@ func LocalAssetState(dir string, ignore []string) ([]asset.Asset, error) {
 				return nil
 			}
 		}
-		if r.MatchString(n) {
-			m, err := asset.NewMarkdown(n)
+		if r.MatchString(path) {
+			relative, err := filepath.Rel(dir, path)
 			if err != nil {
 				return err
 			}
-			assets = append(assets, m.Asset)
-			for _, i := range m.Images {
-				assets = append(assets, i.Asset)
+			markdown, err := asset.NewMarkdown(relative)
+			if err != nil {
+				return err
+			}
+			assets = append(assets, markdown.Asset)
+			for _, image := range markdown.Images {
+				assets = append(assets, image.Asset)
 			}
 		}
 		return nil

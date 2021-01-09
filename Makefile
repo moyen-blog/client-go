@@ -6,3 +6,6 @@ watch:
 
 build:
 	@go build -o sync.out
+
+sync:
+	@cd example && ../sync.out
