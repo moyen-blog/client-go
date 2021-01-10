@@ -2,11 +2,12 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/yaml.v2"
 )
 
 // Config holds configuration for syncing local files to the API
@@ -33,14 +34,15 @@ func parseIgnoreGlobs(dir string) (ignore []string) {
 	return
 }
 
-// ParseConfigJSON parses .moyenrc configuration file in supplied directory
+// ParseConfigYAML parses .moyenrc configuration file in supplied directory
 // Configuration username and token must be specified
-func ParseConfigJSON(dir string) (*Config, error) {
+func ParseConfigYAML(dir string) (*Config, error) {
 	config := &Config{
 		ignore: parseIgnoreGlobs(dir),
 	}
-	configJSON, err := ioutil.ReadFile(filepath.Join(dir, ".moyenrc"))
-	err = json.Unmarshal(configJSON, &config)
+	configYAML, err := ioutil.ReadFile(filepath.Join(dir, ".moyenrc"))
+	err = yaml.Unmarshal(configYAML, &config)
+	// err = json.Unmarshal(configJSON, &config)
 	if err != nil {
 		return nil, errors.New("Failed to parse configuration JSON")
 	}

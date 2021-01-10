@@ -32,7 +32,7 @@ func main() {
 	if err != nil {
 		fatalError("Failed to read current working directory", err)
 	}
-	config, err := ParseConfigJSON(cwd)
+	config, err := ParseConfigYAML(cwd)
 	if err != nil {
 		fatalError("Failed to load configuration JSON", err)
 	}
