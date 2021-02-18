@@ -5,7 +5,6 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"io"
-	"io/ioutil"
 	"os"
 )
 
@@ -28,7 +27,7 @@ func (f *Asset) computeHash() (string, error) {
 
 // Buffer returns a bytes.Buffer of the asset files content
 func (f *Asset) Buffer() (*bytes.Buffer, error) {
-	b, err := ioutil.ReadFile(f.Path)
+	b, err := os.ReadFile(f.Path)
 	if err != nil {
 		return nil, err
 	}

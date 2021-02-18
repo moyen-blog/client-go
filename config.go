@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"errors"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -40,7 +39,7 @@ func ParseConfigYAML(dir string) (*Config, error) {
 	config := &Config{
 		ignore: parseIgnoreGlobs(dir),
 	}
-	configYAML, err := ioutil.ReadFile(filepath.Join(dir, ".moyenrc"))
+	configYAML, err := os.ReadFile(filepath.Join(dir, ".moyenrc"))
 	err = yaml.Unmarshal(configYAML, &config)
 	// err = json.Unmarshal(configJSON, &config)
 	if err != nil {
