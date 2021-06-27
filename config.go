@@ -40,10 +40,13 @@ func ParseConfigYAML(dir string) (*Config, error) {
 		ignore: parseIgnoreGlobs(dir),
 	}
 	configYAML, err := os.ReadFile(filepath.Join(dir, ".moyenrc"))
+	if err != nil {
+		return nil, errors.New("failed to read configuration JSON")
+	}
 	err = yaml.Unmarshal(configYAML, &config)
 	// err = json.Unmarshal(configJSON, &config)
 	if err != nil {
-		return nil, errors.New("Failed to parse configuration JSON")
+		return nil, errors.New("failed to parse configuration JSON")
 	}
 	return config, nil
 }

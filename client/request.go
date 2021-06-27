@@ -19,7 +19,7 @@ func request(method string, url string, token string, payload io.Reader, holder 
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		err = fmt.Errorf("Request failed with status code %d", resp.StatusCode)
+		err = fmt.Errorf("request failed with status code %d", resp.StatusCode)
 	}
 	json.NewDecoder(resp.Body).Decode(&holder)
 	return resp.StatusCode, err

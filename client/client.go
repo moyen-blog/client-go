@@ -25,11 +25,11 @@ func NewClient(username, token, endpoint string) (*Client, error) {
 	}
 	r := regexp.MustCompile(`^\w+$`) // Just ensure username and token are present
 	if !r.MatchString(username) || !r.MatchString(token) {
-		return nil, errors.New("Invalid username and/or token")
+		return nil, errors.New("invalid username and/or token")
 	}
 	e, err := url.Parse(endpoint) // Ensure valid API endpoint
 	if err != nil {
-		return nil, fmt.Errorf("Failed to parse API endpoint %s", e)
+		return nil, fmt.Errorf("failed to parse API endpoint %s", e)
 	}
 	e.Path, e.RawQuery, e.RawQuery, e.User = "", "", "", nil // Ignore all but scheme, host
 	e.Host = username + "." + e.Host
@@ -55,7 +55,7 @@ func (c *Client) GetAssets(holder interface{}) error {
 // Used for both creating and updating articles and images
 func (c *Client) PutAsset(path string, payload *bytes.Buffer) error {
 	if payload == nil {
-		return errors.New("Payload can not be nil")
+		return errors.New("fayload can not be nil")
 	}
 	_, err := request("PUT", c.assetEndpoint(path), c.token, payload, nil)
 	return err

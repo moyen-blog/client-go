@@ -25,6 +25,9 @@ func LocalAssetState(dir string, ignore []string) ([]asset.Asset, error) {
 	assets := make([]asset.Asset, 0)
 	r := regexp.MustCompile(`.\.md$`)
 	walk := func(path string, f os.FileInfo, err error) error {
+		if err != nil {
+			return err // Error reading file/dir at path
+		}
 		relative, err := filepath.Rel(dir, path)
 		if err != nil {
 			return err
