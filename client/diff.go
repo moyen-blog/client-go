@@ -1,11 +1,7 @@
-package main
-
-import (
-	"github.com/moyen-blog/sync-dir/asset"
-)
+package client
 
 // Action defines the file action enum underlying type
-type Action uint
+type Action int
 
 // File action enum
 const (
@@ -16,11 +12,11 @@ const (
 
 // AssetDiff defines an action that should be taken on a file
 type AssetDiff struct {
-	Asset  asset.Asset
+	Asset  Asset
 	Action Action
 }
 
-func sliceContains(a asset.Asset, b []asset.Asset) (bool, *asset.Asset) {
+func sliceContains(a Asset, b []Asset) (bool, *Asset) {
 	for _, i := range b {
 		if a.Path == i.Path {
 			return true, &i
@@ -29,7 +25,8 @@ func sliceContains(a asset.Asset, b []asset.Asset) (bool, *asset.Asset) {
 	return false, nil
 }
 
-func diffAssets(localFiles []asset.Asset, remoteFiles []asset.Asset) (diff []AssetDiff) {
+// DiffAssets compares local and remote assets and returns a diff
+func (c *Client) DiffAssets(localFiles []Asset, remoteFiles []Asset) (diff []AssetDiff) {
 	for _, local := range localFiles { // Find ∈a & ∉b and ∈a & ∈b
 		if found, remoteFile := sliceContains(local, remoteFiles); found {
 			if local.Hash != remoteFile.Hash {

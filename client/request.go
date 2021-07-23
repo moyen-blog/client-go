@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// request is used internally to make calls to the API
 func request(method string, url string, token string, payload io.Reader, holder interface{}) (int, error) {
 	req, err := http.NewRequest(method, url, payload)
 	if err != nil {

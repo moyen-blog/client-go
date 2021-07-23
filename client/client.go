@@ -15,11 +15,11 @@ type Client struct {
 	username string
 	token    string
 	endpoint string
+	ignore   []string
 }
 
 // NewClient creates an API client
-// Configuration is loaded from .moyenrc (JSON) in CWD
-func NewClient(username, token, endpoint string) (*Client, error) {
+func NewClient(username, token, endpoint string, ignore []string) (*Client, error) {
 	if endpoint == "" {
 		endpoint = defaultEndpoint
 	}
@@ -37,11 +37,8 @@ func NewClient(username, token, endpoint string) (*Client, error) {
 		username,
 		token,
 		e.String(),
+		ignore,
 	}, nil
-}
-
-func (c *Client) assetEndpoint(p string) string {
-	return c.endpoint + "/" + p
 }
 
 // GetAssets gets asset paths and hashes for a provided author
@@ -53,16 +50,14 @@ func (c *Client) GetAssets(holder interface{}) error {
 
 // PutAsset upserts an asset for a provided author
 // Used for both creating and updating articles and images
-func (c *Client) PutAsset(path string, payload *bytes.Buffer) error {
-	if payload == nil {
-		return errors.New("fayload can not be nil")
-	}
-	_, err := request("PUT", c.assetEndpoint(path), c.token, payload, nil)
+func (c *Client) PutAsset(path string, payload []byte) error {
+	buf := bytes.NewBuffer(payload)
+	_, err := request("PUT", c.endpoint+"/"+path, c.token, buf, nil)
 	return err
 }
 
 // DeleteAsset deletes an asset for a provided author
 func (c *Client) DeleteAsset(path string) error {
-	_, err := request("DELETE", c.assetEndpoint(path), c.token, nil, nil)
+	_, err := request("DELETE", c.endpoint+"/"+path, c.token, nil, nil)
 	return err
 }

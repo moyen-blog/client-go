@@ -1,56 +1,43 @@
 package main
 
 import (
-	"bufio"
+	"flag"
 	"fmt"
 	"os"
 
 	"github.com/moyen-blog/sync-dir/client"
 )
 
-func printDiff(diff []AssetDiff) {
-	fmt.Printf("\033[1m%d action(s) staged\033[0m\n", len(diff))
-	for _, i := range diff {
-		switch i.Action {
-		case Create:
-			fmt.Printf("\033[32mCREATE\033[0m\t%s\n", i.Asset.Path)
-		case Update:
-			fmt.Printf("\033[33mUPDATE\033[0m\t%s\n", i.Asset.Path)
-		case Delete:
-			fmt.Printf("\033[31mDELETE\033[0m\t%s\n", i.Asset.Path)
+func main() {
+	yes := flag.Bool("y", false, "skips all interactive prompts")
+	flag.Parse()
+
+	cwd, err := os.Getwd()
+	handleError("Failed to read current working directory", err, true)
+
+	config, err := ParseConfigYAML(cwd)
+	handleError("Failed to load configuration JSON", err, true)
+
+	c, err := client.NewClient(config.Username, config.Token, config.Endpoint, config.ignore)
+	handleError("Failed to create new API client", err, true)
+
+	localFiles, err := c.AssetStateLocal(nil) // Use default FS
+	handleError("Failed to determine local asset state", err, true)
+
+	remoteFiles, err := c.AssetStateRemote()
+	handleError("Failed to determine remote asset state", err, true)
+
+	diff := c.DiffAssets(localFiles, remoteFiles)
+	if len(diff) == 0 {
+		fmt.Println("No changes to sync")
+		return
+	}
+	printDiff(diff)
+
+	if !*yes { // Yes flag bypasses prompt
+		if c := askForConfirmation("Proceed with changes?"); !c {
+			return
 		}
 	}
-}
-
-func fatalError(message string, err error) {
-	fmt.Println("\033[31mERROR\033[0m", message+":", err.Error())
-	os.Exit(1)
-}
-
-func main() {
-	cwd, err := os.Getwd()
-	if err != nil {
-		fatalError("Failed to read current working directory", err)
-	}
-	config, err := ParseConfigYAML(cwd)
-	if err != nil {
-		fatalError("Failed to load configuration JSON", err)
-	}
-	c, err := client.NewClient(config.Username, config.Token, config.Endpoint)
-	if err != nil {
-		fatalError("Failed to create new API client", err)
-	}
-	localFiles, err := LocalAssetState(cwd, config.ignore)
-	if err != nil {
-		fatalError("Failed to determine local asset state", err)
-	}
-	remoteFiles, err := RemoteAssetState(c)
-	if err != nil {
-		fatalError("Failed to determine remote asset state", err)
-	}
-	diff := diffAssets(localFiles, remoteFiles)
-	printDiff(diff)
-	fmt.Print("Press 'Enter' to continue...")
-	bufio.NewReader(os.Stdin).ReadBytes('\n')
-	sync(c, diff)
+	c.Sync(diff, printProgress)
 }
