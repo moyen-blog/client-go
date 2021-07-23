@@ -12,16 +12,15 @@ func main() {
 	yes := flag.Bool("y", false, "skips all interactive prompts")
 	flag.Parse()
 
-	cwd, err := os.Getwd()
-	handleError("Failed to read current working directory", err, true)
+	fsys := os.DirFS(".") // CWD
 
-	config, err := ParseConfigYAML(cwd)
+	config, err := parseConfig(fsys)
 	handleError("Failed to load configuration JSON", err, true)
 
-	c, err := client.NewClient(config.Username, config.Token, config.Endpoint, config.ignore)
+	c, err := client.NewClient(config.credentials.Username, config.credentials.Token, config.Endpoint, config.Ignore)
 	handleError("Failed to create new API client", err, true)
 
-	localFiles, err := c.AssetStateLocal(nil) // Use default FS
+	localFiles, err := c.AssetStateLocal(fsys)
 	handleError("Failed to determine local asset state", err, true)
 
 	remoteFiles, err := c.AssetStateRemote()

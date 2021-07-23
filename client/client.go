@@ -18,6 +18,19 @@ type Client struct {
 	ignore   []string
 }
 
+// cleanURL validates a URL and removes all but scheme and host
+func cleanURL(u string) (*url.URL, error) {
+	url, err := url.Parse(u)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse API endpoint %s", u)
+	}
+	if url.Host == "" || url.Scheme == "" {
+		return nil, errors.New("URL host and scheme can not be empty")
+	}
+	url.Path, url.RawQuery, url.RawFragment, url.User = "", "", "", nil // Ignore all but scheme, host
+	return url, nil
+}
+
 // NewClient creates an API client
 func NewClient(username, token, endpoint string, ignore []string) (*Client, error) {
 	if endpoint == "" {
@@ -27,16 +40,15 @@ func NewClient(username, token, endpoint string, ignore []string) (*Client, erro
 	if !r.MatchString(username) || !r.MatchString(token) {
 		return nil, errors.New("invalid username and/or token")
 	}
-	e, err := url.Parse(endpoint) // Ensure valid API endpoint
+	url, err := cleanURL(endpoint)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse API endpoint %s", e)
+		return nil, fmt.Errorf("failed to parse API endpoint %s", endpoint)
 	}
-	e.Path, e.RawQuery, e.RawQuery, e.User = "", "", "", nil // Ignore all but scheme, host
-	e.Host = username + "." + e.Host
+	url.Host = username + "." + url.Host
 	return &Client{
 		username,
 		token,
-		e.String(),
+		url.String(),
 		ignore,
 	}, nil
 }
