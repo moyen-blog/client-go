@@ -1,4 +1,4 @@
-module github.com/moyen-blog/sync-dir
+module github.com/moyen-blog/client-go
 
 go 1.16
 

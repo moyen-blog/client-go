@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/moyen-blog/sync-dir/client"
+	"github.com/moyen-blog/client-go/client"
 )
 
 // printDiff prints the staged actions required to synchronize local with remote files

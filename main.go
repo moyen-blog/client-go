@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/moyen-blog/sync-dir/client"
+	"github.com/moyen-blog/client-go/client"
 )
 
 func main() {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/moyen-blog/sync-dir/client/mocks"
+	"github.com/moyen-blog/client-go/client/mocks"
 )
 
 func init() {
