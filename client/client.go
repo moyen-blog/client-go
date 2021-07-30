@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"regexp"
 )
@@ -53,23 +54,22 @@ func NewClient(username, token, endpoint string, ignore []string) (*Client, erro
 	}, nil
 }
 
-// GetAssets gets asset paths and hashes for a provided author
-// JSON response is decoded into the provided holder
-func (c *Client) GetAssets(holder interface{}) error {
-	_, err := request("GET", c.endpoint, c.token, nil, holder)
-	return err
+// GetAssets gets asset paths and hashes for the configured author
+func (c *Client) GetAssets() (assets []Asset, err error) {
+	_, err = request(http.MethodGet, c.endpoint, c.token, nil, &assets)
+	return
 }
 
-// PutAsset upserts an asset for a provided author
+// PutAsset upserts an asset for the configured author
 // Used for both creating and updating articles and images
 func (c *Client) PutAsset(path string, payload []byte) error {
 	buf := bytes.NewBuffer(payload)
-	_, err := request("PUT", c.endpoint+"/"+path, c.token, buf, nil)
+	_, err := request(http.MethodPut, c.endpoint+"/"+path, c.token, buf, nil)
 	return err
 }
 
-// DeleteAsset deletes an asset for a provided author
+// DeleteAsset deletes an asset for the configured author
 func (c *Client) DeleteAsset(path string) error {
-	_, err := request("DELETE", c.endpoint+"/"+path, c.token, nil, nil)
+	_, err := request(http.MethodDelete, c.endpoint+"/"+path, c.token, nil, nil)
 	return err
 }

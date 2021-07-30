@@ -1,7 +1,6 @@
 package client
 
 import (
-	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -32,7 +31,6 @@ func (c *Client) AssetStateLocal(fsys fs.FS) ([]Asset, error) {
 			}
 			asset, err := NewAsset(path, f)
 			if err != nil {
-				fmt.Println("3")
 				return err
 			}
 			assets = append(assets, *asset)
@@ -48,7 +46,6 @@ func (c *Client) AssetStateLocal(fsys fs.FS) ([]Asset, error) {
 
 // AssetStateRemote returns the state of an authors articles
 // Essentially a wrapper around GetAssets
-func (c *Client) AssetStateRemote() (result []Asset, err error) {
-	err = c.GetAssets(&result)
-	return
+func (c *Client) AssetStateRemote() ([]Asset, error) {
+	return c.GetAssets()
 }
