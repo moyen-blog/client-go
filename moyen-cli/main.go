@@ -34,7 +34,7 @@ func main() {
 	printDiff(diff)
 
 	if !*yes { // Yes flag bypasses prompt
-		if c := askForConfirmation("Proceed with changes?"); !c {
+		if c := askForConfirmation("Proceed with changes?", nil); !c {
 			return
 		}
 	}

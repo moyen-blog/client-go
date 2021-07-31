@@ -37,9 +37,9 @@ func TestRequestStatusError(t *testing.T) {
 }
 
 func TestRequestJSONError(t *testing.T) {
-	holder := struct{}{}
+	dest := struct{}{}
 	mocks.MockHTTPClient.SetResponse("*&(^", 200, nil)
-	_, err := request(http.MethodGet, "", "", nil, holder)
+	_, err := request(http.MethodGet, "", "", nil, dest)
 	if err == nil {
 		t.Error("Should fail request with JSON error")
 	}

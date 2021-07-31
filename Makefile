@@ -1,11 +1,5 @@
 run:
-	@go run . || true
-
-watch:
-	@reflex -r '\.go' -s -- sh -c "make build"
+	@cd moyen-cli && go run . || true
 
 build:
-	@go build -o sync.out
-
-sync:
-	@cd example && ../sync.out
+	@cd moyen-cli && go build -o moyen-cli.out

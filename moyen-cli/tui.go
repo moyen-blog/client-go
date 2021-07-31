@@ -35,11 +35,14 @@ func printProgress(asset client.Asset, err error) error {
 }
 
 // askForConfirmation prompts the user to confirm a proposed action
-func askForConfirmation(s string) bool {
-	reader := bufio.NewReader(os.Stdin)
+// Defaults to reading input from stdin
+func askForConfirmation(s string, r *bufio.Reader) bool {
+	if r == nil {
+		r = bufio.NewReader(os.Stdin)
+	}
 	for {
 		fmt.Printf("%s [y/n]: ", s)
-		response, err := reader.ReadString('\n')
+		response, err := r.ReadString('\n')
 		handleError("Failed to read user input", err, true)
 		response = strings.ToLower(strings.TrimSpace(response))
 		if response == "y" || response == "yes" {
