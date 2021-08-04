@@ -15,7 +15,7 @@ func main() {
 	fsys := os.DirFS(".") // CWD
 
 	config, err := parseConfig(fsys)
-	handleError("Failed to load configuration JSON", err, true)
+	handleError("Failed to load credentials and/or configuration", err, true)
 
 	c, err := client.NewClient(config.credentials.Username, config.credentials.Token, config.Endpoint, config.Ignore)
 	handleError("Failed to create new API client", err, true)

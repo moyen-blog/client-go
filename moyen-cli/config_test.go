@@ -2,9 +2,15 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"testing/fstest"
 )
+
+func init() {
+	os.Unsetenv("MOYEN_USERNAME")
+	os.Unsetenv("MOYEN_TOKEN")
+}
 
 func TestConfigEmptyYAML(t *testing.T) {
 	path := "test.yaml"
@@ -13,7 +19,7 @@ func TestConfigEmptyYAML(t *testing.T) {
 	fsys[path] = &fstest.MapFile{
 		Data: []byte(""),
 	}
-	err := parseYaml(fsys, path, true, &dest)
+	err := parseYaml(fsys, path, &dest)
 	if err != nil {
 		t.Error("Should successfully parse config YAML")
 	}
@@ -34,7 +40,7 @@ array:
 	fsys[path] = &fstest.MapFile{
 		Data: []byte(yaml),
 	}
-	err := parseYaml(fsys, path, true, &dest)
+	err := parseYaml(fsys, path, &dest)
 	if err != nil {
 		t.Error("Should successfully parse config YAML")
 	}
@@ -52,20 +58,10 @@ array:
 	}
 }
 
-func TestConfigMissingRequiredYAML(t *testing.T) {
-	path := "test.yaml"
-	dest := struct{}{}
-	fsys := make(fstest.MapFS)
-	err := parseYaml(fsys, path, true, &dest)
-	if err == nil {
-		t.Error("Should fail if missing required YAML")
-	}
-}
-
-func TestConfigMissingOptionalYAML(t *testing.T) {
+func TestConfigMissingYAML(t *testing.T) {
 	path := "test.yaml"
 	fsys := make(fstest.MapFS)
-	err := parseYaml(fsys, path, false, nil)
+	err := parseYaml(fsys, path, nil)
 	if err != nil {
 		t.Error("Should succeed if missing optional YAML")
 	}
@@ -78,7 +74,7 @@ func TestConfigErrorBadYAML(t *testing.T) {
 	fsys[path] = &fstest.MapFile{
 		Data: []byte("(*&^"),
 	}
-	err := parseYaml(fsys, path, true, &dest)
+	err := parseYaml(fsys, path, &dest)
 	if err == nil {
 		t.Error("Should fail parsing invalid YAML")
 	}
@@ -116,5 +112,47 @@ token: %s`, username, token)
 	}
 	if len(c.Ignore) != 2 {
 		t.Errorf("Should ignore %d patterns but got %d", 2, len(c.Ignore))
+	}
+}
+
+func TestConfigEnvVars(t *testing.T) {
+	username := "testusername"
+	token := "testtoken"
+	fsys := make(fstest.MapFS)
+	os.Setenv("MOYEN_USERNAME", username)
+	defer os.Unsetenv("MOYEN_USERNAME")
+	os.Setenv("MOYEN_TOKEN", token)
+	defer os.Unsetenv("MOYEN_TOKEN")
+	c, err := parseConfig(fsys)
+	if err != nil {
+		t.Error("Should successfully parse config and credentials YAML")
+	}
+	if c.credentials.Username != username {
+		t.Errorf("Should have username %s but got %s", username, c.credentials.Username)
+	}
+	if c.credentials.Token != token {
+		t.Errorf("Should have token %s but got %s", token, c.credentials.Token)
+	}
+}
+
+func TestConfigEnvVarsYAML(t *testing.T) {
+	username := "testusername"
+	token := "testtoken"
+	credentialsYaml := fmt.Sprintf(`username: %s`, username)
+	fsys := make(fstest.MapFS)
+	fsys[".moyencredentials"] = &fstest.MapFile{
+		Data: []byte(credentialsYaml),
+	}
+	os.Setenv("MOYEN_TOKEN", token)
+	defer os.Unsetenv("MOYEN_TOKEN")
+	c, err := parseConfig(fsys)
+	if err != nil {
+		t.Error("Should successfully parse config and credentials YAML")
+	}
+	if c.credentials.Username != username {
+		t.Errorf("Should have username %s but got %s", username, c.credentials.Username)
+	}
+	if c.credentials.Token != token {
+		t.Errorf("Should have token %s but got %s", token, c.credentials.Token)
 	}
 }
