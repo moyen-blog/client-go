@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 )
 
-// Asset is the underlying file in markdown and image assets
+// Asset is the underlying file in Markdown and image assets
 type Asset struct {
 	Path    string
 	Hash    string

@@ -1,4 +1,2 @@
 .DS_Store
-.env
-*.out
-example
+moyen-cli/binaries
